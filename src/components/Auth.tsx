@@ -45,6 +45,19 @@ function Copyright(props: any) {
 const theme = createTheme();
 
 const Auth: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+  //emailでログイン（authモジュールを使用）
+  const signInEmail = async () => {
+    await auth.signInWithEmailAndPassword(email, password);
+  };
+  //emailでログイン（authモジュールを使用）
+  const signUpEmail = async () => {
+    await auth.createUserWithEmailAndPassword(email, password);
+  };
+
+  // Googleにログインする
   const signInGoogle = async () => {
     await auth.signInWithPopup(provider).catch((err) => alert(err.message));
   };
@@ -93,7 +106,7 @@ const Auth: React.FC = () => {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Sign in
+              {isLogin ? "Login" : "Register"}
             </Typography>
             <Box
               component="form"
@@ -110,6 +123,12 @@ const Auth: React.FC = () => {
                 name="email"
                 autoComplete="email"
                 autoFocus
+                value={email}
+                onChange={(
+                  e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+                ) => {
+                  setEmail(e.target.value);
+                }}
               />
               <TextField
                 margin="normal"
@@ -120,17 +139,51 @@ const Auth: React.FC = () => {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                value={password}
+                onChange={(
+                  e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+                ) => {
+                  setPassword(e.target.value);
+                }}
               />
 
               <Button
-                type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                onClick={
+                  isLogin
+                    ? async () => {
+                        try {
+                          await signInEmail();
+                        } catch (err: any) {
+                          alert(err.message);
+                        }
+                      }
+                    : async () => {
+                        try {
+                          await signUpEmail();
+                        } catch (err: any) {
+                          alert(err.message);
+                        }
+                      }
+                }
               >
-                Sign In
+                {isLogin ? "Login" : "Register"}
               </Button>
-
+              <Grid container>
+                <Grid item xs>
+                  <span className={styles.login_reset}>Forgot password?</span>
+                </Grid>
+                <Grid item xs>
+                  <span
+                    className={styles.login_toggleMode}
+                    onClick={() => setIsLogin(!isLogin)}
+                  >
+                    {isLogin ? "Create new account" : "Back to login"}
+                  </span>
+                </Grid>
+              </Grid>
               <Button
                 fullWidth
                 variant="contained"
