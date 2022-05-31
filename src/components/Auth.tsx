@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 
 import styles from "./Auth.module.css";
+import { updateUserProfile } from "../features/userSlice";
 
 function Copyright(props: any) {
   return (
@@ -45,16 +46,49 @@ function Copyright(props: any) {
 const theme = createTheme();
 
 const Auth: React.FC = () => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [avatarImage, setavatarImage] = useState<File | null>(null);
   const [isLogin, setIsLogin] = useState(true);
+
+  const onChangeImageHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files![0]) {
+      setavatarImage(e.target.files![0]);
+      e.target.value = "";
+    }
+  };
+
   //emailでログイン（authモジュールを使用）
   const signInEmail = async () => {
     await auth.signInWithEmailAndPassword(email, password);
   };
   //emailでログイン（authモジュールを使用）
   const signUpEmail = async () => {
-    await auth.createUserWithEmailAndPassword(email, password);
+    const authUser = await auth.createUserWithEmailAndPassword(email, password);
+    let url = "";
+    if (avatarImage) {
+      const S =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const N = 16;
+      const randomChar = Array.from(crypto.getRandomValues(new Uint32Array(N)))
+        .map((n) => S[n % S.length])
+        .join("");
+      const fileName = randomChar + "_" + avatarImage.name;
+      await storage.ref(`avatars/${fileName}`).put(avatarImage);
+      url = await storage.ref("avatars").child(fileName).getDownloadURL();
+    }
+    await authUser.user?.updateProfile({
+      displayName: username,
+      photoURL: url,
+    });
+    dispatch(
+      updateUserProfile({
+        displayName: username,
+        photoUrl: url,
+      })
+    );
   };
 
   // Googleにログインする
@@ -175,7 +209,7 @@ const Auth: React.FC = () => {
                 <Grid item xs>
                   <span className={styles.login_reset}>Forgot password?</span>
                 </Grid>
-                <Grid item xs>
+                <Grid item>
                   <span
                     className={styles.login_toggleMode}
                     onClick={() => setIsLogin(!isLogin)}
