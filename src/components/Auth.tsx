@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { auth, provider, storage } from "../firebase";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -148,6 +149,49 @@ const Auth: React.FC = () => {
               onSubmit={handleSubmit}
               sx={{ mt: 1 }}
             >
+              {!isLogin && (
+                <>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    name="username"
+                    autoComplete="username"
+                    autoFocus
+                    value={username}
+                    onChange={(
+                      e: React.ChangeEvent<
+                        HTMLTextAreaElement | HTMLInputElement
+                      >
+                    ) => {
+                      setUsername(e.target.value);
+                    }}
+                  />
+                  <Box textAlign="center">
+                    <IconButton>
+                      <label>
+                        <label>
+                          <AccountCircleIcon
+                            fontSize="large"
+                            className={
+                              avatarImage
+                                ? styles.login_addIconLoaded
+                                : styles.login_addIcon
+                            }
+                          />
+                          <input
+                            className={styles.login_hiddenIcon}
+                            type="file"
+                            onChange={onChangeImageHandler}
+                          />
+                        </label>
+                      </label>
+                    </IconButton>
+                  </Box>
+                </>
+              )}
               <TextField
                 margin="normal"
                 required
@@ -182,6 +226,11 @@ const Auth: React.FC = () => {
               />
 
               <Button
+                disabled={
+                  isLogin
+                    ? !email || password.length < 6
+                    : !username || !email || password.length < 6 || !avatarImage
+                }
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
