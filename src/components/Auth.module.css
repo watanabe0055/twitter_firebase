@@ -20,3 +20,13 @@
   cursor: pointer;
   color: whitesmoke;
 }
+
+.modal {
+  outline: none;
+  position: absolute;
+  width: 400px;
+  height: 200px;
+  border-radius: 10px;
+  background-color: white;
+  padding: 50px;
+}
