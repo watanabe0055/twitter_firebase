@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { auth, provider, storage } from "../firebase";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
+import SendIcon from "@mui/icons-material/Send";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
@@ -25,6 +25,17 @@ import {
 
 import styles from "./Auth.module.css";
 import { updateUserProfile } from "../features/userSlice";
+
+const getModalStyle = () => {
+  const top = 50;
+  const left = 50;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+};
 
 function Copyright(props: any) {
   return (
@@ -53,6 +64,21 @@ const Auth: React.FC = () => {
   const [username, setUsername] = useState("");
   const [avatarImage, setavatarImage] = useState<File | null>(null);
   const [isLogin, setIsLogin] = useState(true);
+  const [openModal, setOpenModal] = React.useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
+  const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
+    await auth
+      .sendPasswordResetEmail(resetEmail)
+      .then(() => {
+        setOpenModal(false);
+        setResetEmail("");
+      })
+      .catch((err) => {
+        alert(err.message);
+        setResetEmail("");
+      });
+  };
 
   const onChangeImageHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files![0]) {
@@ -256,7 +282,12 @@ const Auth: React.FC = () => {
               </Button>
               <Grid container>
                 <Grid item xs>
-                  <span className={styles.login_reset}>Forgot password?</span>
+                  <span
+                    className={styles.login_reset}
+                    onClick={() => setOpenModal(true)}
+                  >
+                    Forgot password?
+                  </span>
                 </Grid>
                 <Grid item>
                   <span
@@ -276,6 +307,27 @@ const Auth: React.FC = () => {
                 Sign In With Google
               </Button>
             </Box>
+            <Modal open={openModal} onClose={() => setOpenModal(false)}>
+              <div style={getModalStyle()} className={styles.modal}>
+                <div className={styles.login_modal}>
+                  <TextField
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    type="email"
+                    name="email"
+                    label="Reset E-mail"
+                    value={resetEmail}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setResetEmail(e.target.value);
+                    }}
+                  />
+                  <IconButton onClick={sendResetEmail}>
+                    <SendIcon />
+                  </IconButton>
+                </div>
+              </div>
+            </Modal>
           </Box>
         </Grid>
       </Grid>
